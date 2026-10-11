@@ -7,7 +7,13 @@ import {
   AdminCreateUserPayload, CreateLeadPayload, ApiAgentDossier,
 } from './api-types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api/v1';
+// Server-side: call the backend directly (no CORS). Client-side: route through
+// the Next.js reverse proxy at /api/proxy so the browser never hits the external
+// origin directly, which eliminates CORS errors entirely.
+const API_BASE =
+  typeof window === 'undefined'
+    ? (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api/v1')
+    : '/api/proxy';
 
 export class ApiError extends Error {
   constructor(
