@@ -12,6 +12,14 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(__dirname),
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'https://realestate-backend-production-c422.up.railway.app/api/:path*',
+      },
+    ];
+  },
 };
 
 export default nextConfig;
