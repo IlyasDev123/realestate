@@ -1,8 +1,6 @@
 import type { NextConfig } from 'next';
 import path from 'path';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api/v1';
-
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -13,14 +11,6 @@ const nextConfig: NextConfig = {
   },
   turbopack: {
     root: path.resolve(__dirname),
-  },
-  async rewrites() {
-    return [
-      {
-        source: '/api/proxy/:path*',
-        destination: `${BACKEND_URL}/:path*`,
-      },
-    ];
   },
 };
 

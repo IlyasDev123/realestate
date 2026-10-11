@@ -2,6 +2,27 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const BACKEND = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api/v1';
 
+// Headers that must not be forwarded to the browser:
+// - content-encoding: Node.js fetch already decompresses the body; forwarding
+//   the header would cause the browser to double-decompress and corrupt the data.
+// - transfer-encoding: only meaningful for chunked streaming; we buffer the body.
+// - set-cookie: the cookie Domain would be the backend domain, not localhost/this
+//   origin; Firefox throws an XrayWrapper security error when it sees a cross-origin
+//   cookie in a same-origin response.
+// - connection: hop-by-hop, must not be forwarded per HTTP spec.
+const HOP_BY_HOP = new Set([
+  'content-encoding',
+  'transfer-encoding',
+  'set-cookie',
+  'connection',
+  'keep-alive',
+  'proxy-authenticate',
+  'proxy-authorization',
+  'te',
+  'trailers',
+  'upgrade',
+]);
+
 type Ctx = { params: Promise<{ path: string[] }> };
 
 async function handler(request: NextRequest, ctx: Ctx) {
@@ -9,38 +30,44 @@ async function handler(request: NextRequest, ctx: Ctx) {
   const search = request.nextUrl.search;
   const targetUrl = `${BACKEND}/${path.join('/')}${search}`;
 
-  const headers = new Headers();
+  // Forward all request headers except host/connection
+  const reqHeaders = new Headers();
   request.headers.forEach((value, key) => {
     const lower = key.toLowerCase();
     if (lower !== 'host' && lower !== 'connection') {
-      headers.set(key, value);
+      reqHeaders.set(key, value);
     }
   });
 
   const hasBody = request.method !== 'GET' && request.method !== 'HEAD';
-  const body = hasBody ? await request.arrayBuffer() : undefined;
+  const reqBody = hasBody ? await request.arrayBuffer() : undefined;
 
   let upstream: Response;
   try {
     upstream = await fetch(targetUrl, {
       method: request.method,
-      headers,
-      body: body ? body : undefined,
+      headers: reqHeaders,
+      body: reqBody,
     });
   } catch {
     return NextResponse.json({ message: 'Backend unreachable' }, { status: 502 });
   }
 
-  const responseHeaders = new Headers(upstream.headers);
-  responseHeaders.delete('transfer-encoding');
-  responseHeaders.set('Access-Control-Allow-Origin', '*');
-  responseHeaders.set('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
-  responseHeaders.set('Access-Control-Allow-Headers', 'Authorization,Content-Type,Accept');
+  // Buffer the body — Node.js fetch already decoded any Content-Encoding (gzip etc.)
+  // so the buffer contains plain decompressed bytes.
+  const body = await upstream.arrayBuffer();
 
-  return new NextResponse(upstream.body, {
+  // Copy response headers, stripping hop-by-hop and problematic cross-origin ones
+  const resHeaders = new Headers();
+  upstream.headers.forEach((value, key) => {
+    if (!HOP_BY_HOP.has(key.toLowerCase())) {
+      resHeaders.set(key, value);
+    }
+  });
+
+  return new NextResponse(body, {
     status: upstream.status,
-    statusText: upstream.statusText,
-    headers: responseHeaders,
+    headers: resHeaders,
   });
 }
 
@@ -52,13 +79,5 @@ export const DELETE = handler;
 export const HEAD = handler;
 
 export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
-      'Access-Control-Allow-Headers': 'Authorization,Content-Type,Accept',
-      'Access-Control-Max-Age': '86400',
-    },
-  });
+  return new NextResponse(null, { status: 204 });
 }
