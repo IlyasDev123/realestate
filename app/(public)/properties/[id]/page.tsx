@@ -182,7 +182,7 @@ export default function PropertyDetailPage() {
       <section className="max-w-[1360px] mx-auto px-6 lg:px-8 pt-5 w-full">
         <div className="flex flex-col gap-3">
           {/* Main image */}
-          <div className="relative w-full h-[420px] lg:h-[560px] rounded-2xl overflow-hidden shadow-xl group select-none bg-surface-container">
+          <div className="relative w-full h-[220px] sm:h-[360px] lg:h-[560px] rounded-2xl overflow-hidden shadow-xl group select-none bg-surface-container">
             {images.length > 0 ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -249,13 +249,13 @@ export default function PropertyDetailPage() {
               <>
                 <button
                   onClick={() => setActiveImage(i => (i - 1 + images.length) % images.length)}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center justify-center hover:bg-black/70 transition-colors opacity-0 group-hover:opacity-100"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center justify-center hover:bg-black/70 transition-colors lg:opacity-0 lg:group-hover:opacity-100"
                 >
                   <ChevronLeft size={20} />
                 </button>
                 <button
                   onClick={() => setActiveImage(i => (i + 1) % images.length)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center justify-center hover:bg-black/70 transition-colors opacity-0 group-hover:opacity-100"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center justify-center hover:bg-black/70 transition-colors lg:opacity-0 lg:group-hover:opacity-100"
                 >
                   <ChevronRight size={20} />
                 </button>
@@ -321,7 +321,7 @@ export default function PropertyDetailPage() {
               </div>
 
               <div>
-                <h1 className="text-3xl lg:text-4xl font-bold text-on-surface font-display tracking-tight leading-tight">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-on-surface font-display tracking-tight leading-tight">
                   {property.title}
                 </h1>
                 <div className="flex items-center gap-2 text-on-surface-variant text-sm mt-2">
@@ -335,13 +335,13 @@ export default function PropertyDetailPage() {
               </div>
 
               {/* Price capsule */}
-              <div className="p-6 rounded-2xl bg-surface-container-low shadow-sm flex flex-col sm:flex-row sm:items-baseline justify-between gap-4">
+              <div className="p-4 sm:p-6 rounded-2xl bg-surface-container-low shadow-sm flex flex-col sm:flex-row sm:items-baseline justify-between gap-4">
                 <div>
                   <span className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant block mb-1">
                     {property.purpose === 'sale' ? 'Asking Price' : 'Monthly Rent'}
                   </span>
                   <div className="flex items-baseline gap-3">
-                    <span className="text-4xl font-bold text-on-surface font-display tracking-tight">{formattedPrice}</span>
+                    <span className="text-2xl sm:text-4xl font-bold text-on-surface font-display tracking-tight">{formattedPrice}</span>
                     {property.area_size && (
                       <span className="text-sm text-on-surface-variant font-medium">
                         per {property.area_unit}
@@ -407,7 +407,7 @@ export default function PropertyDetailPage() {
 
             {/* Description */}
             {property.description && (
-              <section className="p-8 rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col gap-5">
+              <section className="p-5 sm:p-8 rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col gap-5">
                 <h2 className="text-xl font-bold text-on-surface tracking-tight">Property Description</h2>
                 <p className="text-on-surface-variant text-base leading-relaxed">{property.description}</p>
               </section>
@@ -415,7 +415,7 @@ export default function PropertyDetailPage() {
 
             {/* Amenities */}
             {property.amenities && property.amenities.length > 0 && (
-              <section className="p-8 rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col gap-6">
+              <section className="p-5 sm:p-8 rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col gap-6">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-bold text-on-surface tracking-tight">Amenities & Features</h2>
                   <span className="px-3 py-1 rounded-full bg-surface-container text-on-surface text-xs font-semibold">
@@ -436,7 +436,7 @@ export default function PropertyDetailPage() {
             )}
 
             {/* Location map */}
-            <section id="location" className="p-8 rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col gap-5">
+            <section id="location" className="p-5 sm:p-8 rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col gap-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                   <h2 className="text-xl font-bold text-on-surface tracking-tight">Location</h2>
@@ -463,7 +463,7 @@ export default function PropertyDetailPage() {
           </article>
 
           {/* RIGHT: 4 cols sticky sidebar */}
-          <aside className="lg:col-span-4 flex flex-col gap-6 sticky top-[90px]">
+          <aside className="lg:col-span-4 flex flex-col gap-6 lg:sticky lg:top-[90px]">
 
             {/* Agent info */}
             {property.agent?.user && (

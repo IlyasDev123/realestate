@@ -5,6 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import {
   Search, Grid2X2, List, X,
   ChevronLeft, ChevronRight, MapPin, SlidersHorizontal,
+  Home, Building2, LandPlot, Check, BedDouble,
+  RotateCcw, TrendingUp, Key, Tag, Building,
 } from 'lucide-react';
 import PropertyCard from '@/components/PropertyCard';
 import { propertiesApi, ApiError } from '@/lib/api';
@@ -55,6 +57,19 @@ function SkeletonCard() {
   );
 }
 
+const PROPERTY_TYPE_OPTIONS = [
+  { value: '' as const,            label: 'All Types',    desc: 'Every category',    Icon: Building2 },
+  { value: 'residential' as const, label: 'Residential',  desc: 'Houses & flats',    Icon: Home      },
+  { value: 'commercial' as const,  label: 'Commercial',   desc: 'Offices & shops',   Icon: Building  },
+  { value: 'plot' as const,        label: 'Plot / Land',  desc: 'Land & parcels',    Icon: LandPlot  },
+];
+
+const PURPOSE_OPTIONS = [
+  { value: '' as const,     label: 'All',  Icon: Building2  },
+  { value: 'sale' as const, label: 'Buy',  Icon: TrendingUp },
+  { value: 'rent' as const, label: 'Rent', Icon: Key        },
+];
+
 function FilterSidebar({
   filters,
   onTypeChange,
@@ -82,113 +97,199 @@ function FilterSidebar({
   ].filter(Boolean).length;
 
   return (
-    <aside className="w-full bg-surface-container-lowest rounded-xl shadow-sm p-6 sticky top-[90px] max-h-[calc(100vh-110px)] overflow-y-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-surface-container">
-        <div className="flex items-center gap-2">
-          <span className="text-base font-semibold text-on-surface">Filters</span>
-          {activeCount > 0 && (
-            <span className="bg-secondary-fixed text-on-secondary-fixed text-xs px-2 py-0.5 rounded-full font-bold">
-              {activeCount}
-            </span>
+    <aside className="w-full bg-surface-container-lowest rounded-2xl shadow-md overflow-hidden sticky top-[90px] max-h-[calc(100vh-110px)] overflow-y-auto">
+
+      {/* ── Branded header ── */}
+      <div className="relative bg-primary-container px-5 py-4 overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.07] bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
+        <div className="relative flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-surface/15 backdrop-blur flex items-center justify-center shrink-0">
+              <SlidersHorizontal size={16} className="text-on-primary" />
+            </div>
+            <div>
+              <p className="text-[10px] uppercase tracking-widest text-on-primary/60 font-bold leading-none">Refine</p>
+              <h3 className="text-sm font-bold text-on-primary leading-tight mt-0.5">Property Filters</h3>
+            </div>
+          </div>
+          {activeCount > 0 ? (
+            <button
+              onClick={onReset}
+              className="flex items-center gap-1.5 text-xs font-semibold text-on-primary/80 hover:text-on-primary bg-surface/10 hover:bg-surface/20 px-2.5 py-1.5 rounded-lg transition-all"
+            >
+              <RotateCcw size={11} />
+              Reset
+            </button>
+          ) : (
+            <span className="text-[10px] text-on-primary/40 font-medium">No filters set</span>
           )}
         </div>
+
+        {/* Active filter indicators */}
         {activeCount > 0 && (
-          <button
-            onClick={onReset}
-            className="text-sm text-secondary hover:underline"
-          >
-            Reset All
-          </button>
+          <div className="relative flex items-center gap-2 mt-3 pt-3 border-t border-surface/10">
+            <div className="flex gap-1">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`h-1 rounded-full transition-all duration-300 ${
+                    i < activeCount ? 'w-5 bg-secondary-fixed' : 'w-2 bg-surface/20'
+                  }`}
+                />
+              ))}
+            </div>
+            <span className="text-[10px] text-on-primary/60 font-medium">
+              {activeCount} of 4 filters active
+            </span>
+          </div>
         )}
       </div>
 
-      {/* Location */}
-      <div className="space-y-2">
-        <span className="text-sm font-semibold text-on-surface block">Location</span>
-        <div className="relative">
-          <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none" />
-          <input
-            type="text"
-            placeholder="City, neighborhood..."
-            value={cityInput}
-            onChange={e => onCityChange(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 bg-surface-container-low border border-outline-variant/20 rounded-lg text-sm text-on-surface placeholder:text-outline/50 focus:outline-none focus:border-secondary/40 transition-colors"
-          />
-        </div>
-      </div>
+      <div className="p-5 space-y-6">
 
-      {/* Transaction type */}
-      <div className="space-y-2">
-        <span className="text-sm font-semibold text-on-surface block">Transaction</span>
-        <div className="grid grid-cols-2 gap-1 bg-surface-container-low p-1 rounded-lg">
-          {[
-            { value: '' as const,     label: 'All' },
-            { value: 'sale' as const, label: 'Buy' },
-            { value: 'rent' as const, label: 'Rent' },
-          ].map(opt => (
-            <button
-              key={opt.value}
-              onClick={() => onPurposeChange(opt.value)}
-              className={`py-1.5 rounded text-xs font-semibold transition-all col-span-${opt.value === '' ? '2' : '1'} ${
-                filters.purpose === opt.value
-                  ? 'bg-surface-container-lowest text-on-surface shadow-sm'
-                  : 'text-on-surface-variant hover:bg-surface-container'
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Property type */}
-      <div className="space-y-2">
-        <span className="text-sm font-semibold text-on-surface block">Property Typology</span>
+        {/* ── Location ── */}
         <div className="space-y-2">
-          {TYPE_OPTIONS.map(opt => (
-            <label key={opt.value} className="flex items-center justify-between cursor-pointer group">
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={opt.value === '' ? filters.type === '' : filters.type === opt.value}
-                  onChange={() => onTypeChange(opt.value)}
-                  className="w-4 h-4 rounded text-secondary focus:ring-0 focus:ring-offset-0 bg-surface-container"
-                />
-                <span className="text-sm text-on-surface group-hover:text-secondary transition-colors">
+          <label className="flex items-center gap-1.5 text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-widest">
+            <MapPin size={10} />
+            Location
+          </label>
+          <div className="relative group">
+            <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant/40 group-focus-within:text-secondary pointer-events-none transition-colors" />
+            <input
+              type="text"
+              placeholder="City or neighborhood…"
+              value={cityInput}
+              onChange={e => onCityChange(e.target.value)}
+              className="w-full pl-9 pr-8 py-2.5 bg-surface-container-low border border-outline-variant/25 rounded-xl text-sm text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-secondary/50 focus:bg-surface-container-lowest focus:ring-2 focus:ring-secondary/10 transition-all"
+            />
+            {cityInput && (
+              <button
+                onClick={() => onCityChange('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-outline-variant/30 hover:bg-error/20 hover:text-error flex items-center justify-center text-on-surface-variant transition-all"
+              >
+                <X size={11} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* ── Transaction type ── */}
+        <div className="space-y-2">
+          <label className="flex items-center gap-1.5 text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-widest">
+            <Tag size={10} />
+            Transaction
+          </label>
+          <div className="grid grid-cols-3 gap-1.5">
+            {PURPOSE_OPTIONS.map(opt => {
+              const active = filters.purpose === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => onPurposeChange(opt.value)}
+                  className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl text-[11px] font-bold transition-all active:scale-95 ${
+                    active
+                      ? 'bg-secondary text-on-secondary shadow-md shadow-secondary/20 ring-2 ring-secondary/30'
+                      : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+                  }`}
+                >
+                  <opt.Icon size={15} />
                   {opt.label}
-                </span>
-              </div>
-            </label>
-          ))}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
 
-      {/* Bedrooms */}
-      <div className="space-y-2">
-        <span className="text-sm font-semibold text-on-surface block">Bedrooms</span>
-        <div className="grid grid-cols-5 gap-1 bg-surface-container-low p-1 rounded-lg">
-          {BEDS_OPTIONS.map(opt => (
-            <button
-              key={opt.value}
-              onClick={() => onBedsChange(opt.value)}
-              className={`py-1 rounded text-xs font-semibold transition-all ${
-                filters.minBeds === opt.value
-                  ? 'bg-primary-container text-on-primary shadow-sm'
-                  : 'text-on-surface-variant hover:bg-surface-container'
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
+        {/* ── Property type ── */}
+        <div className="space-y-2">
+          <label className="flex items-center gap-1.5 text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-widest">
+            <Building2 size={10} />
+            Property Type
+          </label>
+          <div className="space-y-1.5">
+            {PROPERTY_TYPE_OPTIONS.map(opt => {
+              const active = filters.type === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => onTypeChange(opt.value)}
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-left active:scale-[0.98] ${
+                    active
+                      ? 'bg-primary-container ring-1 ring-primary-container/50 shadow-sm'
+                      : 'bg-surface-container hover:bg-surface-container-high'
+                  }`}
+                >
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                    active ? 'bg-surface/20' : 'bg-surface-container-lowest'
+                  }`}>
+                    <opt.Icon size={15} className={active ? 'text-on-primary' : 'text-on-surface-variant'} />
+                  </div>
+                  <div className="flex-1 min-w-0 text-left">
+                    <p className={`text-xs font-semibold leading-none ${active ? 'text-on-primary' : 'text-on-surface'}`}>
+                      {opt.label}
+                    </p>
+                    <p className={`text-[10px] mt-0.5 leading-none ${active ? 'text-on-primary/65' : 'text-on-surface-variant'}`}>
+                      {opt.desc}
+                    </p>
+                  </div>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
+                    active
+                      ? 'border-on-primary bg-on-primary'
+                      : 'border-outline-variant/40'
+                  }`}>
+                    {active && <Check size={11} className="text-primary-container" />}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
 
-      {/* Apply */}
-      <div className="pt-4 border-t border-surface-container">
-        <div className="text-xs text-on-surface-variant text-center">
-          {total > 0 ? `${total} properties match` : 'Adjust filters above'}
+        {/* ── Bedrooms ── */}
+        <div className="space-y-2">
+          <label className="flex items-center gap-1.5 text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-widest">
+            <BedDouble size={10} />
+            Bedrooms (min)
+          </label>
+          <div className="flex gap-1.5">
+            {BEDS_OPTIONS.map(opt => {
+              const active = filters.minBeds === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => onBedsChange(opt.value)}
+                  className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 ${
+                    active
+                      ? 'bg-secondary text-on-secondary shadow-md shadow-secondary/20 ring-2 ring-secondary/30'
+                      : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
+
+        {/* ── Results footer ── */}
+        <div className="pt-1">
+          <div className={`flex items-center justify-between px-4 py-3 rounded-xl ${
+            total > 0 ? 'bg-emerald-50 border border-emerald-200/60' : 'bg-surface-container border border-outline-variant/20'
+          }`}>
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${total > 0 ? 'bg-emerald-500 animate-pulse' : 'bg-outline-variant'}`} />
+              <span className={`text-xs font-semibold ${total > 0 ? 'text-emerald-700' : 'text-on-surface-variant'}`}>
+                {total > 0 ? `${total.toLocaleString()} matches` : 'No results'}
+              </span>
+            </div>
+            {total > 0 && (
+              <span className="text-[10px] text-emerald-600 font-medium">
+                {total === 1 ? '1 property' : `${total} properties`}
+              </span>
+            )}
+          </div>
+        </div>
+
       </div>
     </aside>
   );
@@ -288,7 +389,7 @@ function PropertiesContent() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
             {/* Search row */}
             <div className="flex flex-1 flex-wrap sm:flex-nowrap items-center bg-surface-container-low rounded-xl p-1 gap-1">
-              <div className="flex items-center gap-2 px-3 py-2 flex-1 min-w-[180px] bg-surface-container-lowest rounded-lg">
+              <div className="flex items-center gap-2 px-3 py-2 flex-1 min-w-0 bg-surface-container-lowest rounded-lg">
                 <Search size={16} className="text-outline shrink-0" />
                 <input
                   type="text"
@@ -461,7 +562,7 @@ function PropertiesContent() {
 
             {/* Pagination */}
             {!loading && lastPage > 1 && (
-              <div className="flex items-center justify-center gap-2 pt-4">
+              <div className="flex items-center justify-center gap-1.5 pt-4">
                 <button
                   onClick={() => { if (page > 1) loadProperties(page - 1); }}
                   disabled={page === 1}
@@ -469,22 +570,9 @@ function PropertiesContent() {
                 >
                   <ChevronLeft size={16} />
                 </button>
-                {Array.from({ length: Math.min(7, lastPage) }, (_, i) => {
-                  const pg = lastPage <= 7 ? i + 1 : page <= 4 ? i + 1 : page >= lastPage - 3 ? lastPage - 6 + i : page - 3 + i;
-                  return (
-                    <button
-                      key={pg}
-                      onClick={() => loadProperties(pg)}
-                      className={`w-9 h-9 rounded-lg text-sm font-semibold transition-all ${
-                        pg === page
-                          ? 'bg-primary-container text-on-primary shadow-sm'
-                          : 'bg-surface-container-lowest border border-outline-variant/20 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low'
-                      }`}
-                    >
-                      {pg}
-                    </button>
-                  );
-                })}
+                <span className="text-sm text-on-surface-variant px-2">
+                  <span className="font-semibold text-on-surface">{page}</span> / {lastPage}
+                </span>
                 <button
                   onClick={() => { if (page < lastPage) loadProperties(page + 1); }}
                   disabled={page === lastPage}

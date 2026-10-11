@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { Building2, Mail, Phone, MapPin, MessageSquare, AtSign, Rss, Globe } from 'lucide-react';
 
 const QUICK_LINKS = [
@@ -25,6 +28,9 @@ const SOCIAL = [
 ];
 
 export default function Footer() {
+  const [year, setYear] = useState(2024);
+  useEffect(() => { setYear(new Date().getFullYear()); }, []);
+
   return (
     <footer className="w-full bg-primary-container text-on-primary-container">
       <div className="max-w-[1360px] mx-auto px-6 lg:px-8 pt-16 pb-8">
@@ -135,10 +141,10 @@ export default function Footer() {
 
         {/* ── Bottom bar ── */}
         <div className="pt-8 border-t border-on-primary/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-on-primary-container">
-            © {new Date().getFullYear()} EstateLux Premier Realty Inc. Equal Housing Opportunity.
+          <p className="text-xs text-on-primary-container text-center sm:text-left">
+            © {year} EstateLux Premier Realty Inc. Equal Housing Opportunity.
           </p>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center justify-center gap-4">
             {['Privacy Policy', 'Terms of Service', 'Sitemap'].map(item => (
               <a
                 key={item}

@@ -230,14 +230,14 @@ export default function AgentProfilePage() {
       {/* ── Hero profile card ── */}
       <section className="w-full py-10">
         <div className="max-w-[1360px] mx-auto px-6 lg:px-8">
-          <div className="bg-surface-container-lowest rounded-xl shadow-md p-8 relative overflow-hidden">
+          <div className="bg-surface-container-lowest rounded-xl shadow-md p-4 sm:p-8 relative overflow-hidden">
             <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-gradient-to-br from-surface-container-high/40 to-transparent pointer-events-none" />
 
             <div className="relative z-10 flex flex-col lg:flex-row items-start gap-8">
 
               {/* Portrait */}
               <div className="flex flex-col items-center shrink-0 mx-auto lg:mx-0">
-                <div className="relative w-44 h-44 rounded-2xl p-1 bg-surface-container shadow-md">
+                <div className="relative w-32 h-32 sm:w-44 sm:h-44 rounded-2xl p-1 bg-surface-container shadow-md">
                   {avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={avatarUrl} alt={name} className="w-full h-full object-cover rounded-xl" />
@@ -262,7 +262,7 @@ export default function AgentProfilePage() {
                 <div className="flex flex-col gap-1">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                      <h1 className="text-3xl font-semibold text-on-surface font-display tracking-tight">{name}</h1>
+                      <h1 className="text-xl sm:text-3xl font-semibold text-on-surface font-display tracking-tight">{name}</h1>
                       <p className="text-base text-secondary-container font-semibold mt-0.5">
                         {specialization}{joinYear ? `, Est. ${joinYear}` : ''}
                       </p>
@@ -592,7 +592,7 @@ export default function AgentProfilePage() {
           </div>
 
           {/* RIGHT: 4 cols — sticky */}
-          <div className="lg:col-span-4 flex flex-col gap-6 lg:sticky lg:top-24">
+          <div className="lg:col-span-4 flex flex-col gap-6 lg:sticky lg:top-[90px]">
 
             {/* ── Consultation form ── */}
             <div

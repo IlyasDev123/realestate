@@ -166,7 +166,7 @@ export default function HomePage() {
 
         {/* Background image + gradient */}
         <div
-          className="relative w-full h-[640px] lg:h-[700px] bg-cover bg-center flex items-start justify-center"
+          className="relative w-full h-[480px] sm:h-[580px] lg:h-[700px] bg-cover bg-center flex items-start justify-center"
           style={{
             backgroundImage: `url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&q=85')`,
           }}
@@ -174,7 +174,7 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-b from-primary-container/80 via-primary-container/50 to-background" />
 
           {/* Hero text */}
-          <div className="relative z-10 max-w-[1360px] w-full mx-auto px-6 lg:px-8 pt-40 pb-32 flex flex-col items-center text-center">
+          <div className="relative z-10 max-w-[1360px] w-full mx-auto px-6 lg:px-8 pt-24 sm:pt-32 lg:pt-40 pb-14 sm:pb-24 lg:pb-32 flex flex-col items-center text-center">
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface-container-lowest/15 backdrop-blur-md border border-on-primary/15 mb-6">
               <BadgeCheck size={14} className="text-secondary-fixed" />
@@ -183,19 +183,19 @@ export default function HomePage() {
               </span>
             </div>
 
-            <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold text-on-primary max-w-4xl tracking-tight leading-[1.06] drop-shadow-sm mb-5">
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-7xl font-bold text-on-primary max-w-4xl tracking-tight leading-[1.06] drop-shadow-sm mb-5">
               Find Your Perfect Property
             </h1>
 
-            <p className="text-on-primary/80 text-lg leading-relaxed max-w-2xl font-light">
+            <p className="text-on-primary/80 text-sm sm:text-base lg:text-lg leading-relaxed max-w-2xl font-light">
               Curated luxury residences, penthouses, and private estates across premier global destinations.
             </p>
           </div>
         </div>
 
         {/* ── Floating Search Card ── */}
-        <div className="max-w-[1240px] w-full mx-auto px-6 lg:px-8 -mt-24 relative z-20">
-          <div className="bg-surface-container-lowest rounded-2xl shadow-2xl p-6 flex flex-col gap-5">
+        <div className="max-w-[1240px] w-full mx-auto px-4 sm:px-6 lg:px-8 -mt-12 sm:-mt-20 lg:-mt-24 relative z-20">
+          <div className="bg-surface-container-lowest rounded-2xl shadow-2xl p-4 sm:p-6 flex flex-col gap-4 sm:gap-5">
 
             {/* Purpose tabs + count */}
             <div className="flex items-center justify-between">
@@ -310,13 +310,13 @@ export default function HomePage() {
           3. FEATURED TROPHY LISTINGS
       ═══════════════════════════════════════ */}
       <section className="w-full max-w-[1360px] mx-auto px-6 lg:px-8 pt-16">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-wrap items-center justify-between mb-8 gap-4">
           <div>
             <div className="inline-flex items-center gap-1.5 text-secondary text-xs font-semibold uppercase tracking-widest">
               <Star size={13} className="fill-secondary" />
               <span>Curated Selection</span>
             </div>
-            <h2 className="text-3xl lg:text-4xl font-bold text-on-surface font-display tracking-tight mt-1">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-on-surface font-display tracking-tight mt-1">
               Featured Trophy Listings
             </h2>
           </div>
@@ -375,7 +375,7 @@ export default function HomePage() {
           4. TRUST / STATS BENCHMARK
       ═══════════════════════════════════════ */}
       <section className="w-full max-w-[1360px] mx-auto px-6 lg:px-8 pt-16">
-        <div className="w-full bg-surface-container-low rounded-3xl p-8 lg:p-12">
+        <div className="w-full bg-surface-container-low rounded-3xl p-5 sm:p-8 lg:p-12">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               { ...STAT_CONFIG[0], value: stats?.total_volume ? fmtVol(stats.total_volume) : STAT_CONFIG[0].fallback },

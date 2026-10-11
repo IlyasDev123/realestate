@@ -1,11 +1,7 @@
 'use client';
 
-import { createContext, useContext, useLayoutEffect, useEffect, useState, useCallback } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { ApiUser } from '@/lib/api-types';
-
-// useLayoutEffect on client, useEffect on server — avoids the SSR hydration warning
-// while preserving the synchronous auth-state read before first paint.
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 interface AuthState {
   user: ApiUser | null;
@@ -29,7 +25,7 @@ const USER_KEY = 'haven_user';
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>({ user: null, token: null, isLoading: true });
 
-  useIsomorphicLayoutEffect(() => {
+  useEffect(() => {
     const token = localStorage.getItem(TOKEN_KEY);
     const userStr = localStorage.getItem(USER_KEY);
     if (token && userStr) {

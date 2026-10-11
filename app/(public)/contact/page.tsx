@@ -115,7 +115,7 @@ export default function ContactPage() {
                 GLOBAL CLIENT ADVISORY
               </span>
             </div>
-            <h1 className="font-display text-5xl lg:text-6xl font-semibold tracking-tight text-primary-container leading-none">
+            <h1 className="font-display text-3xl sm:text-4xl lg:text-6xl font-semibold tracking-tight text-primary-container leading-none">
               Get in Touch
             </h1>
             <p className="text-lg text-on-surface-variant leading-relaxed pt-1 max-w-2xl">
@@ -126,8 +126,8 @@ export default function ContactPage() {
           </div>
 
           {/* Quick Contact Ribbon */}
-          <div className="mt-6 p-4 rounded-xl bg-surface-container-low shadow-sm flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-[220px]">
+          <div className="mt-6 p-4 rounded-xl bg-surface-container-low shadow-sm flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
               <div className="w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center text-primary-container shadow-sm">
                 <Phone size={18} />
               </div>
@@ -138,7 +138,7 @@ export default function ContactPage() {
                 </a>
               </div>
             </div>
-            <div className="flex items-center gap-3 min-w-[220px]">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
               <div className="w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center text-secondary shadow-sm">
                 <MessageSquare size={18} />
               </div>
@@ -147,7 +147,7 @@ export default function ContactPage() {
                 <span className="text-base font-semibold text-on-surface">Available 24/7 Desk</span>
               </div>
             </div>
-            <div className="flex items-center gap-3 min-w-[260px]">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
               <div className="w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center text-primary-container shadow-sm">
                 <Mail size={18} />
               </div>

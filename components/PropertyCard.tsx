@@ -121,7 +121,7 @@ function GridCard({ property }: { property: ApiProperty }) {
         </p>
 
         {/* Specs row */}
-        <div className="mt-auto flex items-center justify-around bg-surface-container-low/50 rounded-xl px-3 py-2 text-on-surface-variant text-xs">
+        <div className="mt-auto flex items-center justify-around flex-wrap gap-1 bg-surface-container-low/50 rounded-xl px-3 py-2 text-on-surface-variant text-xs">
           {property.bedrooms != null && property.bedrooms > 0 && (
             <>
               <span className="flex items-center gap-1"><Bed size={13} /> {property.bedrooms} Beds</span>
@@ -160,7 +160,7 @@ function ListCard({ property }: { property: ApiProperty }) {
       {/* Image */}
       <Link
         href={`/properties/${property.id}`}
-        className="relative sm:w-72 h-52 sm:h-auto shrink-0 overflow-hidden bg-surface-container"
+        className="relative sm:w-72 h-48 sm:h-auto shrink-0 overflow-hidden bg-surface-container"
       >
         {imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element

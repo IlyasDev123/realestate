@@ -104,13 +104,13 @@ export default function AboutPage() {
             <div className="absolute inset-0 bg-gradient-to-r from-primary-container via-primary-container/85 to-transparent z-10" />
 
             {/* content */}
-            <div className="relative z-20 px-8 lg:px-14 py-16 md:py-24 max-w-3xl flex flex-col gap-5">
+            <div className="relative z-20 px-5 sm:px-8 lg:px-14 py-8 sm:py-14 md:py-20 max-w-3xl flex flex-col gap-5">
               <div className="inline-flex items-center gap-2 text-secondary-fixed text-xs uppercase tracking-wider">
                 <BadgeCheck size={15} className="fill-secondary-fixed text-primary-container" />
                 Private Advisory &amp; Fiduciary Firm
               </div>
 
-              <h1 className="text-4xl lg:text-5xl font-semibold text-on-primary tracking-tight leading-[1.08] font-display">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-on-primary tracking-tight leading-[1.08] font-display">
                 Architectural Distinction. <br className="hidden sm:inline" />
                 <span className="text-secondary-fixed">Uncompromising</span> Discretion.
               </h1>
@@ -168,7 +168,7 @@ export default function AboutPage() {
         </section>
 
         {/* ── Two-Column Story ── */}
-        <section className="max-w-[1360px] w-full mx-auto px-6 lg:px-8 pb-10">
+        <section className="max-w-[1360px] w-full mx-auto px-6 lg:px-8 pb-14 lg:pb-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
 
             {/* Left: image + floating card */}
@@ -184,7 +184,7 @@ export default function AboutPage() {
               </div>
 
               {/* Floating glassmorphism card */}
-              <div className="absolute -bottom-6 right-4 left-4 md:left-auto md:right-8 md:max-w-xs bg-surface-container-lowest/95 backdrop-blur-md p-4 rounded-xl shadow-xl z-20">
+              <div className="absolute -bottom-6 right-4 left-4 sm:left-auto sm:right-8 sm:max-w-xs bg-surface-container-lowest/95 backdrop-blur-md p-4 rounded-xl shadow-xl z-20">
                 <div className="flex items-center gap-3 pb-2">
                   <Landmark size={22} className="text-secondary shrink-0" />
                   <span className="text-xs font-semibold uppercase tracking-wider text-on-surface">Fiduciary Standard</span>
@@ -445,7 +445,7 @@ export default function AboutPage() {
 
         {/* ── CTA Banner ── */}
         <section className="max-w-[1360px] w-full mx-auto px-6 lg:px-8 pb-12">
-          <div className="relative bg-primary-container text-on-primary rounded-2xl overflow-hidden p-10 lg:p-16 shadow-2xl">
+          <div className="relative bg-primary-container text-on-primary rounded-2xl overflow-hidden p-6 sm:p-10 lg:p-16 shadow-2xl">
             {/* ambient glows */}
             <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-secondary-container/20 blur-3xl pointer-events-none" />
             <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-secondary/15 blur-3xl pointer-events-none" />
@@ -455,7 +455,7 @@ export default function AboutPage() {
                 <span className="w-2 h-2 rounded-full bg-secondary-container animate-pulse" />
                 Private Client Advisory
               </div>
-              <h2 className="text-2xl lg:text-3xl font-semibold text-on-primary tracking-tight font-display">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-on-primary tracking-tight font-display">
                 Partner with the World&apos;s Foremost Architectural Authority
               </h2>
               <p className="text-sm text-on-primary-container leading-relaxed">

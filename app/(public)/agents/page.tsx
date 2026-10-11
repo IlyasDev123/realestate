@@ -317,7 +317,7 @@ export default function AgentsPage() {
           </div>
 
           {/* ── Hero ── */}
-          <section className="relative rounded-2xl bg-gradient-to-br from-primary-container via-primary-container to-tertiary-container text-on-primary p-10 overflow-hidden shadow-xl">
+          <section className="relative rounded-2xl bg-gradient-to-br from-primary-container via-primary-container to-tertiary-container text-on-primary p-6 sm:p-10 overflow-hidden shadow-xl">
             {/* dot-grid overlay */}
             <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px]" />
 
@@ -326,7 +326,7 @@ export default function AgentsPage() {
                 <span className="text-xs font-semibold text-secondary-container uppercase tracking-widest">
                   Distinguished Representation
                 </span>
-                <h1 className="text-4xl lg:text-5xl font-semibold tracking-tight text-on-primary leading-none font-display">
+                <h1 className="text-2xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-on-primary leading-none font-display">
                   Meet Our Expert Agents <span className="text-secondary-fixed">&amp;</span> Private Advisors
                 </h1>
               </div>
@@ -528,7 +528,7 @@ export default function AgentsPage() {
           )}
 
           {/* ── Advisory section ── */}
-          <section className="rounded-2xl bg-surface-container p-10 flex flex-col gap-8 shadow-sm">
+          <section className="rounded-2xl bg-surface-container p-6 sm:p-10 flex flex-col gap-8 shadow-sm">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div className="flex flex-col gap-2 max-w-2xl">
                 <span className="text-xs font-semibold text-secondary uppercase tracking-widest">
@@ -562,7 +562,7 @@ export default function AgentsPage() {
           </section>
 
           {/* ── Elite Producer CTA ── */}
-          <section className="rounded-2xl bg-gradient-to-r from-primary-container via-primary-container to-secondary-container text-on-primary p-10 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-xl">
+          <section className="rounded-2xl bg-gradient-to-r from-primary-container via-primary-container to-secondary-container text-on-primary p-6 sm:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-xl">
             <div className="flex flex-col gap-2 max-w-2xl">
               <span className="text-xs font-semibold text-secondary-fixed uppercase tracking-wider">
                 Career Expansion
