@@ -60,7 +60,7 @@ export default function AgentEditPropertyPage() {
           parking_spaces: property.parking_spaces,
           amenities: property.amenities ?? [],
           status: property.status,
-          imageUrls: property.images.map((i) => i.url),
+          imageUrls: property.images.map((i) => ({ id: i.id, url: i.url })),
         }}
       />
     </div>

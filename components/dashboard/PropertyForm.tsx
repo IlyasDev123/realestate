@@ -22,9 +22,14 @@ interface ImageFile {
   status: FileStatus;
 }
 
+interface ExistingImage {
+  id: string;
+  url: string;
+}
+
 interface PropertyFormProps {
   propertyId?: string;
-  defaults?: Partial<PropertyPayload & { imageUrls?: string[] }>;
+  defaults?: Partial<PropertyPayload & { imageUrls?: ExistingImage[] }>;
   agents?: { id: string; name: string }[];
   onSuccess?: () => void;
 }
@@ -175,7 +180,8 @@ export default function PropertyForm({ propertyId, defaults, agents, onSuccess }
 
   const [amenities,      setAmenities]      = useState<string[]>(defaults?.amenities ?? []);
   const [amenityInput,   setAmenityInput]   = useState('');
-  const [existingImgUrls]                   = useState<string[]>(defaults?.imageUrls ?? []);
+  const [existingImgs,   setExistingImgs]   = useState<ExistingImage[]>(defaults?.imageUrls ?? []);
+  const [removedImgIds,  setRemovedImgIds]  = useState<string[]>([]);
   const [newFiles,       setNewFiles]       = useState<ImageFile[]>([]);
   const [errors,         setErrors]         = useState<Record<string, string>>({});
   const [apiError,       setApiError]       = useState('');
@@ -213,6 +219,11 @@ export default function PropertyForm({ propertyId, defaults, agents, onSuccess }
       URL.revokeObjectURL(prev[index].preview);
       return prev.filter((_, i) => i !== index);
     });
+  }
+
+  function removeExistingImage(id: string) {
+    setExistingImgs(prev => prev.filter(img => img.id !== id));
+    setRemovedImgIds(prev => [...prev, id]);
   }
 
   function validateStep(s: number): Record<string, string> {
@@ -305,6 +316,10 @@ export default function PropertyForm({ propertyId, defaults, agents, onSuccess }
 
       if (isEdit && propertyId) {
         await propertiesApi.update(propertyId, payload);
+
+        for (const imgId of removedImgIds) {
+          await propertiesApi.deleteImage(propertyId, imgId);
+        }
 
         if (newFiles.length > 0) {
           setPhase('uploading');
@@ -726,15 +741,19 @@ export default function PropertyForm({ propertyId, defaults, agents, onSuccess }
                 className="hidden"
               />
 
-              {(existingImgUrls.length > 0 || newFiles.length > 0) && (
+              {(existingImgs.length > 0 || newFiles.length > 0) && (
                 <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
-                  {existingImgUrls.map((url, i) => (
-                    <div key={`ex-${i}`} className="relative aspect-square rounded-xl overflow-hidden border-2 border-outline-variant/20">
+                  {existingImgs.map((img, i) => (
+                    <div key={`ex-${img.id}`} className="relative aspect-square rounded-xl overflow-hidden group border-2 border-outline-variant/20">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={url} alt="" className="w-full h-full object-cover" />
+                      <img src={img.url} alt="" className="w-full h-full object-cover" />
                       {i === 0 && (
                         <span className="absolute bottom-1 left-1 text-[9px] bg-secondary text-on-secondary px-1.5 py-0.5 rounded font-bold tracking-wide">COVER</span>
                       )}
+                      <button type="button" onClick={() => removeExistingImage(img.id)}
+                        className="absolute top-1 right-1 w-6 h-6 bg-black/60 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-error">
+                        <X size={12} />
+                      </button>
                     </div>
                   ))}
                   {newFiles.map((item, i) => (
@@ -762,7 +781,7 @@ export default function PropertyForm({ propertyId, defaults, agents, onSuccess }
                           <X size={12} />
                         </button>
                       )}
-                      {existingImgUrls.length === 0 && i === 0 && (
+                      {existingImgs.length === 0 && i === 0 && (
                         <span className="absolute bottom-1 left-1 text-[9px] bg-secondary text-on-secondary px-1.5 py-0.5 rounded font-bold tracking-wide">COVER</span>
                       )}
                     </div>

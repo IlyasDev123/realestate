@@ -74,7 +74,7 @@ export default function AdminEditPropertyPage() {
           status: property.status,
           agent_id: property.agent?.id,
           is_featured: property.is_featured,
-          imageUrls: property.images.map((i) => i.url),
+          imageUrls: property.images.map((i) => ({ id: i.id, url: i.url })),
         }}
       />
     </div>

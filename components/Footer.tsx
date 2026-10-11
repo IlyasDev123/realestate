@@ -2,26 +2,26 @@ import Link from 'next/link';
 import { Building2, Mail, Phone, MapPin, MessageSquare, AtSign, Rss, Globe } from 'lucide-react';
 
 const QUICK_LINKS = [
-  { label: 'Buy',            href: '/properties?purpose=sale' },
-  { label: 'Rent',           href: '/properties?purpose=rent' },
-  { label: 'Commercial',     href: '/properties?type=commercial' },
-  { label: 'Off-Market',     href: '/contact' },
-  { label: 'List Property',  href: '/add-property' },
+  { label: 'Buy', href: '/properties?purpose=sale' },
+  { label: 'Rent', href: '/properties?purpose=rent' },
+  { label: 'Commercial', href: '/properties?type=commercial' },
+  { label: 'Off-Market', href: '/contact' },
+  { label: 'List Property', href: '/add-property' },
 ];
 
 const PROPERTY_TYPES = [
-  { label: 'Villas & Estates',   href: '/properties?type=residential' },
-  { label: 'Modern Penthouses',  href: '/properties?type=residential' },
-  { label: 'Waterfront Homes',   href: '/properties?type=residential' },
+  { label: 'Villas & Estates', href: '/properties?type=residential' },
+  { label: 'Modern Penthouses', href: '/properties?type=residential' },
+  { label: 'Waterfront Homes', href: '/properties?type=residential' },
   { label: 'Historic Townhomes', href: '/properties?type=residential' },
-  { label: 'Land & Acreage',     href: '/properties?type=plot' },
+  { label: 'Land & Acreage', href: '/properties?type=plot' },
 ];
 
 const SOCIAL = [
   { icon: MessageSquare, href: '#' },
-  { icon: AtSign,        href: '#' },
-  { icon: Rss,           href: '#' },
-  { icon: Globe,         href: '#' },
+  { icon: AtSign, href: '#' },
+  { icon: Rss, href: '#' },
+  { icon: Globe, href: '#' },
 ];
 
 export default function Footer() {
@@ -105,21 +105,21 @@ export default function Footer() {
               <div>
                 <p className="text-sm text-on-primary font-medium mb-0.5">Global Inquiries</p>
                 <a
-                  href="mailto:concierge@estateluxrealty.com"
+                  href="mailto:hello@lezood.com"
                   className="text-sm text-on-primary-container hover:text-on-primary transition-colors flex items-center gap-2"
                 >
                   <Mail size={13} className="text-secondary-container shrink-0" />
-                  concierge@estateluxrealty.com
+                  hello@lezood.com
                 </a>
               </div>
               <div>
                 <p className="text-sm text-on-primary font-medium mb-0.5">Phone</p>
                 <a
-                  href="tel:+15551234567"
+                  href="tel:+923114910259"
                   className="text-sm text-on-primary-container hover:text-on-primary transition-colors flex items-center gap-2"
                 >
                   <Phone size={13} className="text-secondary-container shrink-0" />
-                  +1 (555) 123-4567
+                  923114910259
                 </a>
               </div>
               <div>
