@@ -16,7 +16,7 @@ interface AgentCardProps {
   agent: ApiAgent;
   onApprove?: (id: string) => void;
   onReject?: (id: string) => void;
-  actionId: string | null;
+  actionId?: string | null;
 }
 
 export function AgentCard({ agent, onApprove, onReject, actionId }: AgentCardProps) {

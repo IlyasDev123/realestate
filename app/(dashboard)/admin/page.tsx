@@ -99,26 +99,70 @@ const BADGE: Record<string, string> = {
   'Closed lost':'bg-red-50 text-red-700',
 };
 
-function ActivityRow({ item }: { item: ApiActivityItem }) {
+// ── Avatar helpers ─────────────────────────────────────────────────────────────
+const AVATAR_GRADIENTS = [
+  'linear-gradient(135deg, #904d00, #fe932c)',
+  'linear-gradient(135deg, #047857, #10b981)',
+  'linear-gradient(135deg, #1e40af, #3b82f6)',
+  'linear-gradient(135deg, #6d28d9, #8b5cf6)',
+  'linear-gradient(135deg, #be185d, #ec4899)',
+  'linear-gradient(135deg, #0e7490, #06b6d4)',
+];
+
+function getAvatarGradient(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return AVATAR_GRADIENTS[Math.abs(hash) % AVATAR_GRADIENTS.length];
+}
+
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+}
+
+// ── Activity feed row ─────────────────────────────────────────────────────────
+function ActivityRow({ item, isLast }: { item: ApiActivityItem; isLast: boolean }) {
   const isDeal = item.type === 'deal';
+  const name = item.title ?? 'Unknown';
+  const avatarGrad = getAvatarGradient(name);
   return (
-    <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-surface-container-low/50 transition-colors">
-      <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${isDeal ? 'bg-secondary-fixed/30' : 'bg-surface-container-high'}`}>
-        {isDeal ? <Gavel size={15} className="text-secondary" /> : <UserPlus size={15} className="text-on-surface-variant" />}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex flex-wrap items-center justify-between gap-1">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="text-sm font-semibold text-on-surface truncate max-w-[200px]">{item.title}</span>
-            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 ${BADGE[item.badge] ?? 'bg-surface-container text-on-surface-variant'}`}>{item.badge}</span>
-          </div>
-          <span className="text-xs text-on-surface-variant shrink-0">{timeAgo(item.created_at)}</span>
+    <div className="flex gap-3">
+      {/* Timeline column */}
+      <div className="flex flex-col items-center shrink-0">
+        <div
+          className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-white text-xs font-bold shadow-sm"
+          style={{ background: isDeal ? 'linear-gradient(135deg, #904d00, #fe932c)' : 'linear-gradient(135deg, #047857, #10b981)' }}
+        >
+          {initials(name)}
         </div>
-        <p className="text-xs text-on-surface-variant mt-0.5 truncate">
-          {isDeal
-            ? `${item.sub}${item.agent_name ? ` · ${item.agent_name}` : ''}${item.amount ? ` · ${fmtPKR(parseFloat(item.amount))}` : ''}`
-            : `${item.sub}${item.property ? ` · ${item.property}` : ''}${item.phone ? ` · ${item.phone}` : ''}`}
-        </p>
+        {!isLast && <div className="w-px flex-1 mt-1 bg-outline-variant/20" />}
+      </div>
+      {/* Content */}
+      <div className={`flex-1 min-w-0 pb-3 ${isLast ? '' : ''}`}>
+        <div
+          className={`flex items-start gap-3 p-4 rounded-xl border transition-all hover:shadow-sm ${
+            isDeal
+              ? 'bg-surface-container-lowest border-outline-variant/10 hover:border-secondary/30'
+              : 'bg-surface-container-lowest border-outline-variant/10 hover:border-emerald-500/30'
+          }`}
+          style={{ borderLeftWidth: '4px', borderLeftColor: isDeal ? 'var(--color-secondary)' : '#10b981' }}
+        >
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center justify-between gap-1">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-sm font-semibold text-on-surface truncate max-w-[200px]">{item.title}</span>
+                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 ${BADGE[item.badge] ?? 'bg-surface-container text-on-surface-variant'}`}>{item.badge}</span>
+              </div>
+              <span className="text-xs text-on-surface-variant shrink-0">{timeAgo(item.created_at)}</span>
+            </div>
+            <p className="text-xs text-on-surface-variant mt-0.5 truncate">
+              {isDeal
+                ? `${item.sub}${item.agent_name ? ` · ${item.agent_name}` : ''}${item.amount ? ` · ${fmtPKR(parseFloat(item.amount))}` : ''}`
+                : `${item.sub}${item.property ? ` · ${item.property}` : ''}${item.phone ? ` · ${item.phone}` : ''}`}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -127,12 +171,18 @@ function ActivityRow({ item }: { item: ApiActivityItem }) {
 function ActiveDealRow({ deal }: { deal: ApiActiveDeal }) {
   const isConfirmed = deal.deal_status === 'confirmed';
   return (
-    <div className={`flex items-start justify-between p-2.5 rounded-lg hover:bg-surface-container-low transition-colors ${isConfirmed ? 'bg-secondary-fixed/10 border border-secondary/10' : 'bg-amber-50/50 border border-amber-200/40'}`}>
+    <div
+      className={`flex items-start justify-between p-3 rounded-xl transition-colors ${
+        isConfirmed
+          ? 'border-l-4 border-secondary bg-gradient-to-r from-secondary/8 to-transparent'
+          : 'border-l-4 border-amber-500 bg-gradient-to-r from-amber-500/8 to-transparent'
+      }`}
+    >
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-on-surface truncate">{deal.property ?? 'Unnamed Property'}</p>
-        <p className="text-xs text-on-surface-variant mt-0.5">{deal.agent_name ?? '—'} · {deal.deal_type === 'sale' ? 'Sale' : 'Rent'} · {fmtPKR(parseFloat(deal.amount))}</p>
+        <p className="text-sm font-semibold text-on-surface truncate">{deal.property ?? 'Unnamed Property'}</p>
+        <p className="text-xs text-on-surface-variant mt-0.5">{deal.agent_name ?? '—'} · {deal.deal_type === 'sale' ? 'Sale' : 'Rent'} · <span className="font-medium text-on-surface">{fmtPKR(parseFloat(deal.amount))}</span></p>
       </div>
-      <span className={`text-xs px-2 py-0.5 rounded-full font-semibold shrink-0 ml-2 capitalize ${isConfirmed ? 'bg-secondary-fixed text-on-secondary-fixed' : 'bg-amber-100 text-amber-700'}`}>
+      <span className={`text-xs px-2.5 py-1 rounded-full font-semibold shrink-0 ml-2 capitalize ${isConfirmed ? 'bg-secondary/15 text-secondary' : 'bg-amber-100 text-amber-700'}`}>
         {deal.deal_status}
       </span>
     </div>
@@ -156,9 +206,7 @@ function LeadsAreaChart({ data, loading }: { data: ApiMonthStat[]; loading: bool
   const peakCount = counts[peakIdx] ?? 0;
   const { line, area, pts } = buildAreaPath(counts);
 
-  // Thin labels: show every nth label so they don't overlap
   const step = data.length > 15 ? 5 : data.length > 8 ? 3 : 1;
-  // Shorter labels for day-level data
   const shortLabel = (lbl: string) => lbl.length > 6 ? lbl.slice(0, 6) : lbl;
 
   return (
@@ -166,30 +214,30 @@ function LeadsAreaChart({ data, loading }: { data: ApiMonthStat[]; loading: bool
       <div className="relative w-full mt-4" style={{ height: '200px' }}>
         <svg className="w-full h-full" fill="none" preserveAspectRatio="none" viewBox="0 0 600 200">
           <defs>
-            <linearGradient id="areaGrad" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="#fe932c" stopOpacity="0.22" />
-              <stop offset="100%" stopColor="#fe932c" stopOpacity="0" />
+            <linearGradient id="areaGradLeads" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stopColor="var(--color-secondary)" stopOpacity="0.22" />
+              <stop offset="100%" stopColor="var(--color-secondary)" stopOpacity="0" />
             </linearGradient>
           </defs>
           {[50, 100, 150].map(y => (
-            <line key={y} stroke="#dce9ff" strokeDasharray="3 3" x1="0" x2="600" y1={y} y2={y} />
+            <line key={y} stroke="var(--color-outline-variant)" strokeDasharray="3 3" strokeOpacity="0.4" x1="0" x2="600" y1={y} y2={y} />
           ))}
-          <line stroke="#e5eeff" x1="0" x2="600" y1="186" y2="186" />
-          <path d={area} fill="url(#areaGrad)" />
-          <path d={line} stroke="#fe932c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          <line stroke="var(--color-outline-variant)" strokeOpacity="0.3" x1="0" x2="600" y1="186" y2="186" />
+          <path d={area} fill="url(#areaGradLeads)" />
+          <path d={line} style={{ stroke: 'var(--color-secondary)' }} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
           {peakCount > 0 && pts[peakIdx] && (
             <>
-              <line stroke="#fe932c" strokeDasharray="2 3" opacity="0.5"
+              <line style={{ stroke: 'var(--color-secondary)' }} strokeDasharray="2 3" opacity="0.5"
                 x1={pts[peakIdx].x.toFixed(1)} x2={pts[peakIdx].x.toFixed(1)} y1="0" y2="186" />
               <circle cx={pts[peakIdx].x.toFixed(1)} cy={pts[peakIdx].y.toFixed(1)}
-                r="5" fill="#fe932c" stroke="#fff" strokeWidth="2" />
+                r="5" fill="var(--color-secondary)" stroke="#fff" strokeWidth="2" />
             </>
           )}
         </svg>
         {peakCount > 0 && (
-          <div className="absolute top-2 right-2 bg-primary-container text-on-primary px-3 py-1.5 rounded-lg shadow-lg pointer-events-none">
-            <p className="text-[11px] font-semibold text-secondary-fixed/80">{data[peakIdx]?.label} peak</p>
-            <p className="text-sm font-bold text-secondary-fixed">{peakCount} inquiries</p>
+          <div className="absolute top-2 right-2 bg-surface-container border border-secondary/20 px-3 py-1.5 rounded-xl shadow-lg pointer-events-none">
+            <p className="text-[11px] font-semibold text-on-surface-variant">{data[peakIdx]?.label} peak</p>
+            <p className="text-sm font-bold text-secondary">{peakCount} inquiries</p>
           </div>
         )}
       </div>
@@ -206,7 +254,7 @@ function LeadsAreaChart({ data, loading }: { data: ApiMonthStat[]; loading: bool
         ))}
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 bg-surface-container-low px-4 py-2 rounded-lg">
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 bg-surface-container-low px-4 py-2.5 rounded-xl">
         <span className="text-xs text-on-surface-variant">Period total: <strong className="text-on-surface">{total}</strong></span>
         <span className="text-xs text-on-surface-variant">Peak: <strong className="text-on-surface">{peakCount > 0 ? `${peakCount} (${data[peakIdx]?.label})` : '—'}</strong></span>
         <span className="text-xs text-on-surface-variant">Avg/period: <strong className="text-on-surface">{data.length > 0 ? (total / data.length).toFixed(1) : '0'}</strong></span>
@@ -235,10 +283,9 @@ function DealsBarChart({ data, loading, closedVol, completedDeals, confirmedDeal
 
   const counts  = data.map(m => m.count);
   const maxC    = Math.max(...counts, 1);
-  const BAR_H   = 144; // px max bar height
+  const BAR_H   = 144;
   const total   = counts.reduce((s, c) => s + c, 0);
 
-  // Thin labels for dense data
   const step = data.length > 20 ? 7 : data.length > 10 ? 3 : 1;
   const shortLabel = (lbl: string) => data.length > 15 ? lbl.slice(0, 2) : lbl.length > 6 ? lbl.slice(0, 6) : lbl;
 
@@ -258,13 +305,17 @@ function DealsBarChart({ data, loading, closedVol, completedDeals, confirmedDeal
               <div
                 title={`${m.label}: ${m.count} deals`}
                 className={`w-full rounded-t transition-all cursor-pointer ${
-                  isActive
-                    ? 'bg-secondary shadow-sm hover:opacity-90'
-                    : m.count > 0
-                    ? 'bg-surface-container-highest hover:bg-secondary/50'
-                    : 'bg-surface-container-low'
+                  m.count === 0 ? 'bg-surface-container-low' : ''
                 }`}
-                style={{ height: `${h}px` }}
+                style={{
+                  height: `${h}px`,
+                  background: m.count > 0
+                    ? isActive
+                      ? 'linear-gradient(180deg, var(--color-secondary), var(--color-secondary-container))'
+                      : 'linear-gradient(180deg, var(--color-secondary-container), var(--color-secondary-container))'
+                    : undefined,
+                  opacity: m.count > 0 && !isActive ? 0.55 : undefined,
+                }}
               />
               <span className={`text-center leading-tight max-w-full truncate ${data.length > 20 ? 'text-[8px]' : 'text-[10px]'} ${isActive ? 'font-semibold text-on-surface' : 'text-on-surface-variant'} ${i % step !== 0 ? 'invisible' : ''}`}>
                 {shortLabel(m.label)}
@@ -274,7 +325,7 @@ function DealsBarChart({ data, loading, closedVol, completedDeals, confirmedDeal
         })}
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 bg-surface-container-low px-4 py-2 rounded-lg">
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 bg-surface-container-low px-4 py-2.5 rounded-xl">
         <span className="text-xs text-on-surface-variant">Period deals: <strong className="text-on-surface">{total}</strong></span>
         <span className="text-xs text-on-surface-variant">Completed: <strong className="text-on-surface">{completedDeals}</strong></span>
         <span className="text-xs text-on-surface-variant">Volume: <strong className="text-on-surface">{fmtPKR(closedVol)}</strong></span>
@@ -356,6 +407,7 @@ export default function AdminDashboard() {
       sub:   `${stats?.properties_count ?? 0} available · ${fmtPKR(portfolioVal)} portfolio`,
       trend: `${stats?.completed_deals ?? 0} deals closed`,
       icon:  Building,
+      gradient: 'linear-gradient(135deg, #904d00, #fe932c)',
     },
     {
       label: 'Active Leads',
@@ -363,6 +415,7 @@ export default function AdminDashboard() {
       sub:   `${newLeads} new · ${inProgress} in progress`,
       trend: `${stats?.leads_by_status?.closed_won ?? 0} won`,
       icon:  UserPlus,
+      gradient: 'linear-gradient(135deg, #047857, #10b981)',
     },
     {
       label: 'Advisory Agents',
@@ -370,6 +423,7 @@ export default function AdminDashboard() {
       sub:   topCitiesStr,
       trend: `${stats?.total_clients ?? 0} clients`,
       icon:  Users,
+      gradient: 'linear-gradient(135deg, #1e40af, #3b82f6)',
     },
     {
       label: 'Closed Volume',
@@ -377,6 +431,7 @@ export default function AdminDashboard() {
       sub:   `${fmtPKR(commissionVal)} commission earned`,
       trend: `${stats?.completed_deals ?? 0} completed deals`,
       icon:  DollarSign,
+      gradient: 'linear-gradient(135deg, #6d28d9, #8b5cf6)',
     },
   ];
 
@@ -384,91 +439,140 @@ export default function AdminDashboard() {
     a => feedFilter === 'all' || a.type === feedFilter
   );
 
+  // Today's date for hero
+  const todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+
   return (
     <div className="flex flex-col gap-8">
 
-      {/* ── Page header ── */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-1.5 text-xs text-on-surface-variant uppercase tracking-wider font-semibold">
-            <span>Haven RMS</span>
-            <span>/</span>
-            <span className="text-secondary">Overview</span>
+      {/* ── Hero Banner ── */}
+      <div
+        className="relative overflow-hidden rounded-2xl p-7 border border-outline-variant/15 shadow-sm"
+        style={{ background: 'linear-gradient(135deg, color-mix(in srgb, var(--color-secondary-container) 60%, transparent), var(--color-surface-container), var(--color-surface-container-lowest))' }}
+      >
+        {/* Decorative blurred orb */}
+        <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full pointer-events-none" style={{ background: 'var(--color-secondary)', opacity: 0.08, filter: 'blur(64px)' }} />
+        <div className="absolute bottom-0 left-1/3 w-40 h-40 rounded-full pointer-events-none" style={{ background: 'var(--color-secondary)', opacity: 0.04, filter: 'blur(48px)' }} />
+
+        <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          {/* Left: title + date */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold tracking-widest uppercase text-on-surface-variant/60">Operations Overview</span>
+              {/* Live indicator pill */}
+              <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-600 border border-emerald-500/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Live
+              </span>
+            </div>
+            <h1 className="font-display text-3xl lg:text-4xl font-bold text-on-surface tracking-tight leading-tight">
+              Admin Dashboard
+            </h1>
+            <p className="text-sm text-on-surface-variant">{todayStr}</p>
           </div>
-          <h1 className="font-display text-3xl font-semibold text-on-surface tracking-tight">Operations Overview</h1>
-          <p className="text-sm text-on-surface-variant">Live portfolio, pipeline, and deal performance.</p>
+
+          {/* Right: mini-stats + CTA */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            {/* Inline mini-stats */}
+            <div className="flex items-center gap-1 rounded-2xl border border-outline-variant/20 bg-surface-container-lowest/60 backdrop-blur-sm divide-x divide-outline-variant/15 overflow-hidden shadow-sm">
+              <div className="px-4 py-2.5 text-center">
+                <p className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Properties</p>
+                <p className="text-lg font-bold text-on-surface font-display leading-tight">
+                  {loading ? <span className="w-8 h-5 bg-surface-container rounded animate-pulse inline-block" /> : stats?.total_properties ?? 0}
+                </p>
+              </div>
+              <div className="px-4 py-2.5 text-center">
+                <p className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Active Leads</p>
+                <p className="text-lg font-bold text-on-surface font-display leading-tight">
+                  {loading ? <span className="w-8 h-5 bg-surface-container rounded animate-pulse inline-block" /> : stats?.total_leads ?? 0}
+                </p>
+              </div>
+              <div className="px-4 py-2.5 text-center">
+                <p className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide">Commission</p>
+                <p className="text-lg font-bold text-secondary font-display leading-tight">
+                  {loading ? <span className="w-12 h-5 bg-surface-container rounded animate-pulse inline-block" /> : fmtPKR(commissionVal)}
+                </p>
+              </div>
+            </div>
+
+            {/* New Property CTA */}
+            <Link
+              href="/admin/properties/new"
+              className="flex items-center gap-2.5 px-5 py-3 rounded-xl text-sm font-bold text-on-secondary shadow-lg hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.98] transition-all shrink-0"
+              style={{ background: 'linear-gradient(135deg, var(--color-secondary), color-mix(in srgb, var(--color-secondary) 80%, #fe932c))' }}
+            >
+              <Plus size={17} />
+              New Property
+            </Link>
+          </div>
         </div>
-        <Link
-          href="/admin/properties/new"
-          className="flex items-center gap-2 bg-secondary text-on-secondary px-4 py-2.5 rounded-lg text-sm font-semibold hover:opacity-95 active:scale-[0.98] transition-all shadow-md self-start lg:self-auto"
-        >
-          <Plus size={16} />
-          New Property
-        </Link>
       </div>
 
       {/* ── KPI Cards ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-        {kpiCards.map((card, idx) => {
-          const palettes = [
-            { grad: 'from-secondary/8',          iconBg: 'bg-secondary/15',          iconTxt: 'text-secondary',        valueTxt: 'text-secondary',        trendBg: 'bg-secondary/8 text-secondary',        dot: 'bg-secondary' },
-            { grad: 'from-emerald-500/8',         iconBg: 'bg-emerald-100',           iconTxt: 'text-emerald-600',      valueTxt: 'text-emerald-700',      trendBg: 'bg-emerald-50 text-emerald-700',        dot: 'bg-emerald-500' },
-            { grad: 'from-primary-container/10',  iconBg: 'bg-primary-container/15',  iconTxt: 'text-primary-container',valueTxt: 'text-primary-container', trendBg: 'bg-primary-container/10 text-primary-container', dot: 'bg-primary-container' },
-            { grad: 'from-amber-500/8',           iconBg: 'bg-amber-100',             iconTxt: 'text-amber-600',        valueTxt: 'text-amber-700',        trendBg: 'bg-amber-50 text-amber-700',            dot: 'bg-amber-500' },
-          ];
-          const p = palettes[idx];
-          return (
-            <Link
-              key={card.label}
-              href={kpiHrefs[card.label] ?? '#'}
-              className={`relative overflow-hidden flex flex-col justify-between p-5 rounded-2xl bg-gradient-to-br ${p.grad} via-surface-container-lowest to-surface-container-lowest border border-outline-variant/20 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer group`}
-            >
-              {/* Decorative circle */}
-              <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-gradient-to-br from-outline-variant/10 to-transparent pointer-events-none" />
+        {kpiCards.map((card) => (
+          <Link
+            key={card.label}
+            href={kpiHrefs[card.label] ?? '#'}
+            className="relative overflow-hidden flex flex-col justify-between p-5 rounded-2xl text-white hover:-translate-y-1.5 hover:shadow-2xl transition-all duration-300 cursor-pointer group"
+            style={{ background: card.gradient }}
+          >
+            {/* Decorative orb */}
+            <div className="absolute -bottom-8 -right-8 w-32 h-32 rounded-full bg-white/5 pointer-events-none" />
+            <div className="absolute -top-8 -left-8 w-20 h-20 rounded-full bg-white/5 pointer-events-none" />
 
-              <div className="flex items-start justify-between relative">
-                <div className={`w-11 h-11 rounded-2xl ${p.iconBg} flex items-center justify-center shadow-sm`}>
-                  <card.icon size={20} className={p.iconTxt} />
-                </div>
-                <ArrowUpRight size={15} className="text-on-surface-variant/30 group-hover:text-on-surface-variant/70 transition-opacity" />
+            {/* Top row: icon + arrow */}
+            <div className="flex items-start justify-between relative">
+              <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-sm">
+                <card.icon size={20} className="text-white" />
               </div>
+              <ArrowUpRight size={15} className="text-white/40 group-hover:text-white/80 transition-colors" />
+            </div>
 
-              <div className="mt-5 relative">
-                {loading ? (
-                  <div className="w-24 h-9 bg-surface-container rounded-xl animate-pulse mb-1" />
-                ) : (
-                  <span className={`font-display text-3xl font-bold tracking-tight ${p.valueTxt}`}>{card.value}</span>
-                )}
-                <p className="text-xs font-semibold text-on-surface-variant/70 mt-1 truncate">{card.label}</p>
-                {!loading && <p className="text-xs text-on-surface-variant/50 mt-0.5 truncate">{card.sub}</p>}
-              </div>
+            {/* Value + label */}
+            <div className="mt-5 relative">
+              {loading ? (
+                <div className="w-24 h-9 bg-white/20 rounded-xl animate-pulse mb-1" />
+              ) : (
+                <span className="font-display text-4xl font-bold text-white tracking-tight leading-none">{card.value}</span>
+              )}
+              <p className="text-white/70 text-sm font-medium mt-1.5">{card.label}</p>
+              {!loading && <p className="text-white/50 text-xs mt-0.5 truncate">{card.sub}</p>}
+            </div>
 
-              <div className="mt-4 pt-3 border-t border-outline-variant/15 flex items-center justify-between relative">
-                <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${p.trendBg}`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${p.dot}`} />
-                  <span>{loading ? '…' : card.trend}</span>
-                </div>
-              </div>
-            </Link>
-          );
-        })}
+            {/* Trend badge */}
+            <div className="mt-4 pt-3 border-t border-white/15 relative">
+              <span className="inline-flex items-center gap-1.5 bg-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                <TrendingUp size={11} />
+                {loading ? '…' : card.trend}
+              </span>
+            </div>
+          </Link>
+        ))}
       </div>
 
       {/* ── Charts Row ── */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
 
         {/* Area chart — Leads inquiry flow */}
-        <div className="xl:col-span-7 p-6 rounded-xl bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] flex flex-col">
+        <div className="xl:col-span-7 p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/15 shadow-sm border-t-2 flex flex-col" style={{ borderTopColor: 'var(--color-secondary)' }}>
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
             <div>
-              <h2 className="text-base font-semibold text-on-surface">Lead Inquiry Flow</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-base font-semibold text-on-surface">Lead Inquiry Flow</h2>
+                {!loading && leadData.length > 0 && (
+                  <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-secondary/10 text-secondary">
+                    {leadData.reduce((s, m) => s + m.count, 0)} total
+                  </span>
+                )}
+              </div>
               <span className="text-xs text-on-surface-variant">Monthly inquiry volume over time</span>
             </div>
             <RangeFilter value={leadRange} onChange={handleLeadRange} loading={leadLoading} />
           </div>
           <div className="flex items-center gap-4 mt-3">
             <div className="flex items-center gap-1.5 text-xs text-on-surface">
-              <span className="w-2.5 h-2.5 rounded-full bg-secondary" />
+              <span className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--color-secondary)' }} />
               <span>Inquiries</span>
             </div>
             <div className="flex items-center gap-1.5 text-xs text-on-surface-variant">
@@ -480,10 +584,17 @@ export default function AdminDashboard() {
         </div>
 
         {/* Bar chart — Deals */}
-        <div className="xl:col-span-5 p-6 rounded-xl bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] flex flex-col">
+        <div className="xl:col-span-5 p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/15 shadow-sm border-t-2 border-t-blue-500 flex flex-col">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
             <div>
-              <h2 className="text-base font-semibold text-on-surface">Deals Per Period</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-base font-semibold text-on-surface">Deals Per Period</h2>
+                {!loading && dealData.length > 0 && (
+                  <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-600">
+                    {dealData.reduce((s, m) => s + m.count, 0)} total
+                  </span>
+                )}
+              </div>
               <span className="text-xs text-on-surface-variant">Total deal count over time</span>
             </div>
             <RangeFilter value={dealRange} onChange={handleDealRange} loading={dealLoading} />
@@ -503,7 +614,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
 
         {/* Activity Feed */}
-        <div className="xl:col-span-8 p-6 rounded-xl bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] flex flex-col gap-4">
+        <div className="xl:col-span-8 p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/15 shadow-sm flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <h2 className="text-base font-semibold text-on-surface">Recent Activity</h2>
@@ -516,7 +627,7 @@ export default function AdminDashboard() {
           <div className="flex gap-2">
             {(['all', 'deal', 'lead'] as const).map(f => (
               <button key={f} onClick={() => setFeedFilter(f)}
-                className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors capitalize ${feedFilter === f ? 'bg-primary-container text-on-primary' : 'bg-surface-container-low text-on-surface-variant hover:text-on-surface'}`}>
+                className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors capitalize ${feedFilter === f ? 'bg-secondary text-on-secondary shadow-sm' : 'bg-surface-container-low text-on-surface-variant hover:text-on-surface'}`}>
                 {f === 'all' ? 'All' : f === 'deal' ? 'Deals' : 'Leads'}
               </button>
             ))}
@@ -531,9 +642,9 @@ export default function AdminDashboard() {
               <p className="text-sm text-on-surface-variant">No recent activity.</p>
             </div>
           ) : (
-            <div className="flex flex-col gap-1">
-              {filteredActivity.map(item => (
-                <ActivityRow key={`${item.type}-${item.id}`} item={item} />
+            <div className="flex flex-col">
+              {filteredActivity.map((item, idx) => (
+                <ActivityRow key={`${item.type}-${item.id}`} item={item} isLast={idx === filteredActivity.length - 1} />
               ))}
             </div>
           )}
@@ -542,8 +653,8 @@ export default function AdminDashboard() {
         {/* Right column */}
         <div className="xl:col-span-4 flex flex-col gap-6">
 
-          {/* Top Agents */}
-          <div className="p-6 rounded-xl bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] flex flex-col gap-4">
+          {/* Top Agents Leaderboard */}
+          <div className="p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/15 shadow-sm flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-semibold text-on-surface">Top Agents</h2>
               <Link href="/admin/agents" className="text-xs text-secondary hover:underline flex items-center gap-0.5">
@@ -551,30 +662,51 @@ export default function AdminDashboard() {
               </Link>
             </div>
             {loading ? (
-              <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-10 bg-surface-container-low rounded-lg animate-pulse" />)}</div>
+              <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-12 bg-surface-container-low rounded-xl animate-pulse" />)}</div>
             ) : (stats?.featured_agents ?? []).length === 0 ? (
               <p className="text-xs text-on-surface-variant text-center py-4">No agents yet.</p>
             ) : (
-              <div className="flex flex-col gap-3">
-                {stats!.featured_agents.map(agent => {
+              <div className="flex flex-col gap-4">
+                {stats!.featured_agents.map((agent, idx) => {
                   const vol    = parseFloat(agent.total_volume ?? '0');
                   const maxVol = parseFloat(stats!.featured_agents[0]?.total_volume ?? '1');
                   const pct    = maxVol > 0 ? Math.round((vol / maxVol) * 100) : 0;
+                  const name   = agent.user?.full_name ?? 'Agent';
+                  const rankBg = idx === 0
+                    ? 'bg-secondary text-on-secondary'
+                    : idx === 1
+                    ? 'bg-surface-container-high text-on-surface'
+                    : 'bg-surface-container text-on-surface-variant';
                   return (
-                    <div key={agent.id} className="flex flex-col gap-1">
+                    <div key={agent.id} className="flex flex-col gap-1.5">
                       <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <div className="w-7 h-7 rounded-full bg-primary-container flex items-center justify-center shrink-0">
-                            <span className="text-xs font-bold text-on-primary">{agent.user?.full_name?.charAt(0)?.toUpperCase() ?? '?'}</span>
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          {/* Rank badge */}
+                          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${rankBg}`}>
+                            {idx + 1}
+                          </span>
+                          {/* Avatar with gradient */}
+                          <div
+                            className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-white text-xs font-bold shadow-sm"
+                            style={{ background: getAvatarGradient(name) }}
+                          >
+                            {initials(name)}
                           </div>
-                          <span className="text-sm font-medium text-on-surface truncate">{agent.user?.full_name ?? 'Agent'}</span>
+                          <span className="text-sm font-semibold text-on-surface truncate">{name}</span>
                         </div>
-                        <span className="text-xs font-semibold text-secondary shrink-0">{vol > 0 ? fmtPKR(vol) : '—'}</span>
+                        <span className="text-xs font-bold text-secondary shrink-0">{vol > 0 ? fmtPKR(vol) : '—'}</span>
                       </div>
-                      <div className="h-1.5 rounded-full bg-surface-container-high overflow-hidden">
-                        <div className="h-full rounded-full bg-secondary transition-all" style={{ width: `${pct}%` }} />
+                      {/* Gradient progress bar */}
+                      <div className="h-1.5 rounded-full bg-surface-container-high overflow-hidden ml-7">
+                        <div
+                          className="h-full rounded-full transition-all"
+                          style={{
+                            width: `${pct}%`,
+                            background: 'linear-gradient(90deg, var(--color-secondary), var(--color-secondary-container))',
+                          }}
+                        />
                       </div>
-                      <p className="text-[10px] text-on-surface-variant">{agent.properties_count ?? 0} listings · {agent.closed_deals_count ?? 0} closed</p>
+                      <p className="text-[10px] text-on-surface-variant ml-7">{agent.properties_count ?? 0} listings · {agent.closed_deals_count ?? 0} closed</p>
                     </div>
                   );
                 })}
@@ -583,7 +715,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Active Deals */}
-          <div className="p-6 rounded-xl bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] flex flex-col gap-4">
+          <div className="p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/15 shadow-sm flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-semibold text-on-surface">Active Deals</h2>
               <Link href="/admin/deals" className="text-xs text-secondary hover:underline flex items-center gap-0.5">
@@ -591,43 +723,81 @@ export default function AdminDashboard() {
               </Link>
             </div>
             {loading ? (
-              <div className="space-y-2">{[1,2,3].map(i => <div key={i} className="h-12 bg-surface-container-low rounded-lg animate-pulse" />)}</div>
+              <div className="space-y-2">{[1,2,3].map(i => <div key={i} className="h-14 bg-surface-container-low rounded-xl animate-pulse" />)}</div>
             ) : (stats?.active_deals ?? []).length === 0 ? (
               <div className="flex flex-col items-center justify-center py-6 gap-2">
                 <Handshake size={24} className="text-on-surface-variant/30" />
                 <p className="text-xs text-on-surface-variant">No active deals right now.</p>
               </div>
             ) : (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2.5">
                 {stats!.active_deals.map(deal => <ActiveDealRow key={deal.id} deal={deal} />)}
               </div>
             )}
             <Link href="/admin/deals"
-              className="w-full py-2 rounded-lg bg-surface-container text-on-surface text-xs font-semibold text-center hover:bg-surface-container-high transition-colors flex items-center justify-center gap-1.5">
-              <RefreshCw size={12} /> View Deals
+              className="w-full py-2.5 rounded-xl bg-surface-container text-on-surface text-xs font-semibold text-center hover:bg-surface-container-high transition-colors flex items-center justify-center gap-1.5">
+              <RefreshCw size={12} /> View All Deals
             </Link>
           </div>
         </div>
       </div>
 
-      {/* ── Quick stats strip ── */}
+      {/* ── Snapshot strip ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: 'Total Clients',    value: loading ? '—' : String(stats?.total_clients ?? 0),  icon: Users,     href: '/admin/clients'  },
-          { label: 'New Leads',        value: loading ? '—' : String(newLeads),                   icon: UserPlus,  href: '/admin/leads'    },
-          { label: 'Confirmed Deals',  value: loading ? '—' : String(stats?.confirmed_deals ?? 0),icon: Handshake, href: '/admin/deals'    },
-          { label: 'Commission',       value: loading ? '—' : fmtPKR(commissionVal),              icon: DollarSign,href: '/admin/deals'    },
+          {
+            label: 'Total Clients',
+            value: loading ? '—' : String(stats?.total_clients ?? 0),
+            icon: Users,
+            href: '/admin/clients',
+            iconGrad: 'linear-gradient(135deg, #1e40af, #3b82f6)',
+            trend: '+',
+          },
+          {
+            label: 'New Leads',
+            value: loading ? '—' : String(newLeads),
+            icon: UserPlus,
+            href: '/admin/leads',
+            iconGrad: 'linear-gradient(135deg, #047857, #10b981)',
+            trend: '+',
+          },
+          {
+            label: 'Confirmed Deals',
+            value: loading ? '—' : String(stats?.confirmed_deals ?? 0),
+            icon: Handshake,
+            href: '/admin/deals',
+            iconGrad: 'linear-gradient(135deg, #904d00, #fe932c)',
+            trend: '+',
+          },
+          {
+            label: 'Commission',
+            value: loading ? '—' : fmtPKR(commissionVal),
+            icon: DollarSign,
+            href: '/admin/deals',
+            iconGrad: 'linear-gradient(135deg, #6d28d9, #8b5cf6)',
+            trend: '+',
+          },
         ].map(item => (
-          <Link key={item.label} href={item.href}
-            className="p-4 rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all flex items-center gap-3 group">
-            <div className="w-9 h-9 rounded-lg bg-surface-container-low flex items-center justify-center shrink-0">
-              <item.icon size={16} className="text-secondary" />
+          <Link
+            key={item.label}
+            href={item.href}
+            className="p-4 rounded-2xl border border-outline-variant/15 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all flex items-center gap-3 group"
+            style={{ background: 'linear-gradient(135deg, var(--color-surface-container), var(--color-surface-container-lowest))' }}
+          >
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
+              style={{ background: item.iconGrad }}
+            >
+              <item.icon size={17} className="text-white" />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="text-xs text-on-surface-variant">{item.label}</p>
               <p className="text-base font-bold text-on-surface font-display leading-snug">{item.value}</p>
             </div>
-            <ChevronRight size={14} className="text-outline ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="flex flex-col items-end gap-1 shrink-0">
+              <ArrowUpRight size={13} className="text-outline opacity-0 group-hover:opacity-100 transition-opacity" />
+              <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">{item.trend}</span>
+            </div>
           </Link>
         ))}
       </div>

@@ -6,10 +6,11 @@ import { useState } from 'react';
 import {
   LayoutDashboard, Building2, Home, PlusCircle, GitBranch,
   Handshake, Bell, Settings, UserCircle, LogOut, Menu, X,
-  UserCheck, Users2, UserCog, Activity, TrendingUp,
+  UserCheck, Users2, UserCog, Activity, TrendingUp, Palette,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { authApi } from '@/lib/api';
+import { useTheme } from '@/contexts/ThemeContext';
 
 // ── Nav data ──────────────────────────────────────────────────────────────────
 interface NavItem {
@@ -89,7 +90,7 @@ const agentSections: NavSection[] = [
     items: [
       { label: 'Notifications',      href: '/agent/notifications', icon: Bell },
       { label: 'My Profile',         href: '/agent/profile',     icon: UserCircle },
-      { label: 'Settings',           href: '/profile',           icon: Settings },
+      { label: 'Appearance',         href: '/agent/settings',    icon: Palette },
     ],
   },
 ];
@@ -200,20 +201,91 @@ function NavSections({
   );
 }
 
+// ── Compact nav (icons only + tooltip) ───────────────────────────────────────
+function CompactNavLink({ item, pathname }: { item: NavItem; pathname: string }) {
+  const active = item.exact
+    ? pathname === item.href
+    : pathname === item.href || pathname.startsWith(item.href + '/');
+
+  return (
+    <Link
+      href={item.href}
+      title={item.label}
+      className={`group relative flex items-center justify-center w-10 h-10 rounded-xl transition-all ${
+        active
+          ? 'bg-secondary/15 text-secondary'
+          : 'text-on-surface-variant/70 hover:bg-surface-container-high hover:text-on-surface'
+      }`}
+    >
+      <item.icon size={18} className="shrink-0" />
+      {/* Tooltip */}
+      <span className="pointer-events-none absolute left-full ml-2 px-2 py-1 rounded-md bg-inverse-surface text-inverse-on-surface text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 shadow-lg">
+        {item.label}
+      </span>
+      {item.badge != null && item.badge > 0 && (
+        <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-secondary" />
+      )}
+    </Link>
+  );
+}
+
+function CompactNavSections({ sections, pathname }: { sections: NavSection[]; pathname: string }) {
+  return (
+    <nav className="flex-1 flex flex-col items-center py-3 gap-1 overflow-y-auto">
+      {sections.flatMap(s => s.items).map(item => (
+        <CompactNavLink key={item.href} item={item} pathname={pathname} />
+      ))}
+    </nav>
+  );
+}
+
 // ── Desktop sidebar ───────────────────────────────────────────────────────────
 export default function Sidebar() {
   const { isAdmin, logout } = useAuth();
+  const { prefs } = useTheme();
   const pathname = usePathname();
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
 
   const sections = isAdmin ? adminSections : agentSections;
+  const compact = prefs.compact;
 
   async function handleLogout() {
     setLoggingOut(true);
     try { await authApi.logout(); } catch { /* ignore */ }
     logout();
     router.push('/login');
+  }
+
+  if (compact) {
+    return (
+      <aside className="fixed left-0 top-0 h-full w-16 bg-surface-container-lowest border-r border-outline-variant/20 z-50 flex flex-col items-center select-none">
+        {/* Brand icon */}
+        <div className="h-16 flex items-center justify-center shrink-0 border-b border-outline-variant/20 w-full">
+          <div className="w-8 h-8 rounded-xl bg-secondary flex items-center justify-center shadow-sm">
+            <Building2 size={15} className="text-on-secondary" />
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <CompactNavSections sections={sections} pathname={pathname} />
+
+        {/* Logout */}
+        <div className="py-4 shrink-0 border-t border-outline-variant/20 w-full flex justify-center">
+          <button
+            onClick={handleLogout}
+            disabled={loggingOut}
+            title="Sign Out"
+            className="group relative w-10 h-10 rounded-xl flex items-center justify-center text-on-surface-variant hover:text-error hover:bg-error-container/15 transition-colors disabled:opacity-40"
+          >
+            <LogOut size={17} className="shrink-0" />
+            <span className="pointer-events-none absolute left-full ml-2 px-2 py-1 rounded-md bg-inverse-surface text-inverse-on-surface text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-50 shadow-lg">
+              Sign Out
+            </span>
+          </button>
+        </div>
+      </aside>
+    );
   }
 
   return (

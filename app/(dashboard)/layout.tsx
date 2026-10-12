@@ -3,12 +3,14 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import Sidebar from '@/components/dashboard/Sidebar';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import { ToastProvider } from '@/components/ui/Toast';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
+  const { prefs } = useTheme();
   const router = useRouter();
 
   useEffect(() => {
@@ -30,10 +32,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!user) return null;
 
+  const sidebarSpacer = prefs.compact ? 'lg:w-16' : 'lg:w-72';
+
   return (
     <div className="min-h-screen bg-surface flex font-sans">
       {/* Sidebar spacer — keeps flex-1 from sliding under the fixed sidebar */}
-      <div className="hidden lg:flex lg:w-72 lg:shrink-0">
+      <div className={`hidden lg:flex ${sidebarSpacer} lg:shrink-0 transition-all duration-300`}>
         <Sidebar />
       </div>
 
